@@ -2,6 +2,6 @@
 1. A particle's location is stored in a floating point number, but each particle has a "display" position which is the closest integer-value coordinated of the floating-point coordinates.
 2. Every particle has a standard mass. Every particle has a velocity.
 3. Particles are attracted to static attractors (their field are pre-computed to save time) and are attracted to other particles. This attraction is modeled through a force. The law of gravitational attraction is applied to them.
-4. Forces enacted on particles impose an acceleration on the particle. Each simulation step this force is calculated, and afterwards the acceleration affects teh velocity. After all velocities are calculated, only then do the new positions get calculated.
+4. Forces enacted on particles impose an acceleration on the particle. Each simulation step this force is calculated, and afterwards the acceleration affects the velocity. After all velocities are calculated, only then do the new positions get calculated.
 5. The new position is calculated step by step, cell by cell, in a straight line. If at any point a cell is occupied, then the last non-occupied cell becomes the new position of the particle, and a collision velocity is then added to the velocities of the two particles.
 6. The collision between two particles cannot be perfectly elastic, but the masses always stay constant. Otherwise an impact is guaranteed to happen again.

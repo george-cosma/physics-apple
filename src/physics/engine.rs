@@ -2,6 +2,11 @@ use std::ops::Mul;
 
 use super::force::Force;
 
+pub const ATTRACTOR_MASS: f64 = 10.0;
+pub const PARTICLE_MASS: f64 = 1.0;
+
+pub const TIMESTEP: f64 = 1.0;
+
 const G: f64 = 1.0 / 1000.0;
 pub fn gravitational_force(
     x1: u32,
@@ -24,8 +29,8 @@ pub fn gravitational_force(
     // LAW IS:
     // F = G * m1 * m2 / r^2
     // Where G is a constant. We'll set this constant however we want, as to fine-tune our simulation.
-    Force { 
-        x_component: G * mass1 * mass2 / radius_squared * cos_alpha, 
-        y_component: G * mass1 * mass2 / (radius_squared) * sin_alpha
+    Force {
+        x_component: G * mass1 * mass2 / radius_squared * cos_alpha,
+        y_component: G * mass1 * mass2 / (radius_squared) * sin_alpha,
     }
 }

@@ -18,8 +18,11 @@ use winit_input_helper::WinitInputHelper;
 
 const WIDTH: u32 = 480;
 const HEIGHT: u32 = 360;
+const FPS: u128 = 30;
+const FRAME_TIME_NS: u128 = 1_000_000_000 / FPS;
 fn main() {
     let mut board = generate_board("frame.0811.png".to_string());
+    board.random_particles(WIDTH*HEIGHT/2);
 
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
@@ -45,7 +48,7 @@ fn main() {
         // The one and only event that winit_input_helper doesn't have for us...
         if let Event::RedrawRequested(_) = event {
             // Request draw here
-            board.draw_static_field(pixels.get_frame_mut());
+            board.draw_particles(pixels.get_frame_mut());
             if let Err(err) = pixels.render() {
                 println!("[ERROR] pixels.render() failed: {}", err);
                 *control_flow = ControlFlow::Exit;
@@ -61,7 +64,7 @@ fn main() {
                 *control_flow = ControlFlow::Exit;
                 return;
             }
-            
+
             // Resize the window
             // if let Some(size) = input.window_resized() {
             //     if let Err(err) = pixels.resize_surface(size.width, size.height) {
@@ -70,10 +73,17 @@ fn main() {
             //         return;
             //     }
             // }
-            // Any update code here
-            // life.update();
-            
+            let start = std::time::Instant::now();
+            let mut now = start.clone();
+            let mut iter = 0;
+            while (now - start).as_nanos() < FRAME_TIME_NS {
+                board.update();
+                now = std::time::Instant::now();
+                iter += 1;
+            }
+            println!("Ran fram for {} iterations.", iter);
             window.request_redraw();
         }
+
     });
 }

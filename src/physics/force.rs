@@ -1,7 +1,10 @@
-use std::ops::{Add, AddAssign, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Sub};
 
 #[derive(Clone)]
-pub struct Force<T> where T: Clone {
+pub struct Force<T>
+where
+    T: Clone,
+{
     pub x_component: T,
     pub y_component: T,
 }
@@ -39,6 +42,28 @@ impl<T: Default + Clone> Default for Force<T> {
         Self {
             x_component: Default::default(),
             y_component: Default::default(),
+        }
+    }
+}
+
+impl<T: Clone + Div<Output = T>> Div<T> for Force<T> {
+    type Output = Self;
+
+    fn div(self, rhs: T) -> Self::Output {
+        Self {
+            x_component: self.x_component / rhs.clone(),
+            y_component: self.y_component / rhs.clone(),
+        }
+    }
+}
+
+impl<T: Clone + Mul<Output = T>> Mul<T> for Force<T> {
+    type Output = Self;
+
+    fn mul(self, rhs: T) -> Self::Output {
+        Self {
+            x_component: self.x_component * rhs.clone(),
+            y_component: self.y_component * rhs.clone(),
         }
     }
 }

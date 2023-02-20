@@ -21,7 +21,7 @@ pub fn generate_board(filename: String) -> Board {
     let mut cells = Vec::with_capacity((img.width() * img.height()) as usize);
     for y in 0..img.height() {
         for x in 0..img.width() {
-            cells.push(BoardCell::new(x,y));
+            cells.push(BoardCell::new(x, y));
         }
     }
 
