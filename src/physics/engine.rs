@@ -11,9 +11,13 @@ pub fn gravitational_force(
     y2: u32,
     mass2: f64,
 ) -> Force<f64> {
-    let rx = x1.abs_diff(x2);
-    let ry = y1.abs_diff(y2);
-    let radius_squared = (rx.mul(rx) + ry.mul(ry)) as f64;
+    let rx = (x2 as i32) - (x1 as i32);
+    let ry = (y2 as i32) - (y1 as i32);
+    let radius_squared = (rx * rx + ry * ry) as f64;
+
+    if radius_squared == 0.0 {
+        return Force::default();
+    }
     let cos_alpha = (rx as f64) / (radius_squared as f64);
     let sin_alpha = (ry as f64) / (radius_squared as f64);
 

@@ -40,4 +40,25 @@ impl Board {
     pub fn get_cell(&mut self, x: u32, y: u32) -> &mut BoardCell {
         return &mut self.cells[(x + y * self.width) as usize];
     }
+
+    pub fn draw_static_field(&self, pixels: &mut [u8]) {
+        for (cell, pixel) in self.cells.iter().zip(pixels.chunks_exact_mut(4)) {
+            let color = if cell.static_field.x_component == 0.0 && cell.static_field.y_component == 0.0 {
+                [0, 0, 0, 0xff]
+            } else if cell.static_field.x_component >= 0.0 && cell.static_field.y_component >= 0.0 {
+                [0xff, 0, 0, 0xff]
+            } else if cell.static_field.x_component <= 0.0 && cell.static_field.y_component >= 0.0 {
+                [0, 0xff, 0, 0xff]
+            } else if cell.static_field.x_component <= 0.0 && cell.static_field.y_component <= 0.0 {
+                [0, 0, 0xff, 0xff]
+            } else if cell.static_field.x_component >= 0.0 && cell.static_field.y_component <= 0.0 {
+                [0xff, 0xff, 0, 0xff]
+            } else {
+                println!("[ERROR] Vector somehow breaks laws of physics. Cell[{}][{}] has force (x: {}, y:{})", cell.x, cell.y, cell.static_field.x_component, cell.static_field.y_component);
+                [0xff, 0xff, 0xff, 0xff]
+            };
+
+            pixel.copy_from_slice(&color);
+        }
+    }
 }
