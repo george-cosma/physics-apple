@@ -127,7 +127,12 @@ impl Board {
 
     pub fn draw_particles(&self, pixels: &mut [u8]) {
         for (cell, pixel) in self.cells.iter().zip(pixels.chunks_exact_mut(4)) {
-            let color = if cell.particles.len() <= 1 {
+            // let color = if cell.particles.len() <= 0 {
+            //     [0, 0, 0, 0xff]
+            // } else {
+            //     [0xff, 0xff, 0xff, (0xff_u8 / 4).saturating_mul(cell.particles.len() as u8)]
+            // };
+            let color = if cell.particles.len() == 0 {
                 [0, 0, 0, 0xff]
             } else {
                 [0xff, 0xff, 0xff, 0xff]

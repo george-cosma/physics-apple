@@ -18,11 +18,15 @@ use winit_input_helper::WinitInputHelper;
 
 const WIDTH: u32 = 480;
 const HEIGHT: u32 = 360;
+
+const USE_FPS: bool = true;
 const FPS: u128 = 30;
-const FRAME_TIME_NS: u128 = 1_000_000_000 / FPS;
+
+const USE_FIXED_ITER: bool = false;
+const ITER_PER_FRAME: u32 = 100;
 fn main() {
     let mut board = generate_board("frame.0811.png".to_string());
-    board.random_particles(WIDTH*HEIGHT/2);
+    board.random_particles(WIDTH*HEIGHT/8);
 
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
@@ -73,15 +77,24 @@ fn main() {
             //         return;
             //     }
             // }
-            let start = std::time::Instant::now();
-            let mut now = start.clone();
-            let mut iter = 0;
-            while (now - start).as_nanos() < FRAME_TIME_NS {
+            if USE_FPS {
+                let start = std::time::Instant::now();
+                let mut now = start.clone();
+                let mut iter = 0;
+                while (now - start).as_nanos() < (1_000_000_000 / FPS) {
+                    board.update();
+                    now = std::time::Instant::now();
+                    iter += 1;
+                }
+                println!("Ran frame for {} iterations.", iter);
+            } else if USE_FIXED_ITER {
+                for _ in 0..ITER_PER_FRAME {
+                    board.update();
+                }
+            } else {
                 board.update();
-                now = std::time::Instant::now();
-                iter += 1;
             }
-            println!("Ran fram for {} iterations.", iter);
+
             window.request_redraw();
         }
 
