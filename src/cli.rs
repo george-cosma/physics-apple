@@ -1,6 +1,6 @@
 use clap::{command, Parser, Subcommand};
 
-/// A program to generate a particle-based simulation
+/// A program to generate a particle-based simulation. You can exit with ESC or Q.
 #[derive(Parser, Debug)]
 #[command(author, version, about)]
 pub struct CLIArgs {
@@ -13,8 +13,15 @@ pub enum Commands {
     /// Generate the static field for a file.
     #[command(arg_required_else_help = true)]
     Generate {
-        /// The files to generate the static field for.
+        /// The paths of the files to generate the static field for.
         files: Vec<String>,
+    },
+
+    /// View the static field of a file.
+    #[command(arg_required_else_help = true)]
+    ViewField {
+        /// The path to the file you want to see the static field.
+        file: String,
     },
 
     /// Simulate a single file.

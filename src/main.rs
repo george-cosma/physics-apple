@@ -21,10 +21,15 @@ fn main() {
     match args.command {
         Commands::Generate { files } => {
             for file in &files {
-                handle_generate(file);
+                generate_and_save_field(file);
             }
         }
-        Commands::SimulateFile { file } => {}
+        Commands::ViewField { file } => {
+            view_field(&file);
+        }
+        Commands::SimulateFile { file } => {
+            simulate_file(&file);
+        }
         Commands::SimulateSequence {
             prefix: _,
             begin: _,
@@ -32,11 +37,31 @@ fn main() {
             suffix: _,
         } => todo!(),
     }
+}
 
-    let board_ref = Rc::new(RefCell::new(generate_board(
-        &"./frames/frame.0488.png".to_string(),
-    )));
-    board_ref.borrow_mut().random_particles(WIDTH * HEIGHT / 2);
+fn generate_and_save_field(file: &String) {
+    let board = physics::generate_board(file);
+
+    let str_path = format!("{}.field", file);
+    let path = std::path::Path::new(&str_path);
+    board.save_field(path).unwrap();
+}
+
+fn view_field(file: &String) {
+    let board_ref = Rc::new(RefCell::new(generate_board(file)));
+    board_ref.borrow_mut().random_particles(WIDTH * HEIGHT / 8);
+
+    gui::run(
+        move |buffer| {
+            board_ref.borrow().draw_static_field(buffer);
+        },
+        || {},
+    );
+}
+
+fn simulate_file(file: &String) {
+    let board_ref = Rc::new(RefCell::new(generate_board(file)));
+    board_ref.borrow_mut().random_particles(WIDTH * HEIGHT / 8);
 
     let boar_ref_clone = board_ref.clone();
     gui::run(
@@ -63,12 +88,4 @@ fn main() {
             }
         },
     );
-}
-
-fn handle_generate(filename: &String) {
-    let board = physics::generate_board(filename);
-
-    let str_path = format!("{}.field", filename);
-    let path = std::path::Path::new(&str_path);
-    board.save_field(path).unwrap();
 }
