@@ -1,4 +1,4 @@
-use std::{cell, path::Path};
+use std::{cell, fs::File, path::Path};
 
 use image::GenericImageView;
 
@@ -9,12 +9,11 @@ mod engine;
 pub mod force;
 pub mod particle;
 
-pub fn generate_board(filename: String) -> Board {
-    println!("[Debug] Generating board for '{}'.", &filename);
+pub fn generate_board(file: &String) -> Board {
+    println!("[Debug] Generating board for '{}'.", file);
 
     // Load Image
-    let str_path = format!("./frames/{}", filename);
-    let path = Path::new(&str_path);
+    let path = Path::new(&file);
     let img = image::open(path).unwrap().grayscale();
 
     // Create Board
@@ -33,14 +32,23 @@ pub fn generate_board(filename: String) -> Board {
         particles: particles,
     };
 
-    // Create static field
-    println!(
-        "[Debug] Generatic static attraction field for '{}'.",
-        &filename
-    );
+    // Try loading static field
+    let str_field_path = format!("{}.field", file);
+    let field_path = Path::new(&str_field_path);
 
-    board.generate_static_field(get_attractors(img));
+    if Path::exists(&field_path) {
+        println!("[Debug] Found static attraction field for '{}'.", file);
 
+        board.load_static_field(field_path).unwrap();
+    } else {
+        // Create static field
+        println!(
+            "[Debug] Generating static attraction field for '{}'.",
+            file
+        );
+
+        board.generate_static_field(get_attractors(img));
+    }
     return board;
 }
 

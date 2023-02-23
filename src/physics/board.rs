@@ -1,14 +1,15 @@
+use byteorder::{BigEndian, LittleEndian, ReadBytesExt, WriteBytesExt};
 use std::{
-    cell::{Ref, RefCell},
+    cell::RefCell,
+    fs::File,
+    io::{Cursor, Error, Read, Write},
     rc::Rc,
 };
 
 use rand::Rng;
 
-use crate::physics::engine::{ATTRACTOR_MASS, PARTICLE_MASS};
-
 use super::{engine::gravitational_force, force::Force, particle::Particle};
-
+use crate::physics::engine::{ATTRACTOR_MASS, PARTICLE_MASS};
 pub struct Board {
     pub width: u32,
     pub heigth: u32,
@@ -140,6 +141,38 @@ impl Board {
 
             pixel.copy_from_slice(&color);
         }
+    }
+
+    pub fn load_static_field(&mut self, field_path: &std::path::Path) -> Result<(), Error> {
+        let mut file = File::open(field_path)?;
+        let mut bytes: Vec<u8> = vec![];
+        file.read_to_end(&mut bytes)?;
+        let mut reader = Cursor::new(bytes);
+
+        for y in 0..self.heigth {
+            for x in 0..self.width {
+                let force_x = reader.read_f64::<LittleEndian>()?;
+                let force_y = reader.read_f64::<LittleEndian>()?;
+                self.get_cell_mut(x, y).static_field = Force {
+                    x_component: force_x,
+                    y_component: force_y,
+                };
+            }
+        }
+
+        return Ok(());
+    }
+
+    pub fn save_field(&self, path: &std::path::Path) -> Result<(), Error> {
+        let mut file = File::create(path)?;
+        for y in 0..self.heigth {
+            for x in 0..self.width {
+                let force = self.get_cell(x, y).static_field.clone();
+                file.write_f64::<LittleEndian>(force.x_component)?;
+                file.write_f64::<LittleEndian>(force.y_component)?;
+            }
+        }
+        return Ok(());
     }
 }
 

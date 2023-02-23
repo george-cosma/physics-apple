@@ -1,7 +1,8 @@
-use std::thread::sleep_ms;
-
+use clap::Parser;
+use cli::{CLIArgs, Commands};
 use physics::generate_board;
 
+mod cli;
 mod physics;
 mod sequence;
 
@@ -25,8 +26,25 @@ const FPS: u128 = 30;
 const USE_FIXED_ITER: bool = false;
 const ITER_PER_FRAME: u32 = 100;
 fn main() {
-    let mut board = generate_board("frame.0811.png".to_string());
-    board.random_particles(WIDTH*HEIGHT/8);
+    let args = CLIArgs::parse();
+
+    match args.command {
+        Commands::Generate { files } => {
+            for file in &files {
+                handle_generate(file);
+            }
+        }
+        Commands::SimulateFile { file } => todo!(),
+        Commands::SimulateSequence {
+            prefix,
+            begin,
+            end,
+            suffix,
+        } => todo!(),
+    }
+
+    let mut board = generate_board(&"./frames/frame.0488.png".to_string());
+    board.random_particles(WIDTH * HEIGHT / 8);
 
     let event_loop = EventLoop::new();
     let mut input = WinitInputHelper::new();
@@ -97,6 +115,13 @@ fn main() {
 
             window.request_redraw();
         }
-
     });
+}
+
+fn handle_generate(filename: &String) {
+    let board = physics::generate_board(filename);
+
+    let str_path = format!("{}.field", filename);
+    let path = std::path::Path::new(&str_path);
+    board.save_field(path).unwrap();
 }
