@@ -1,4 +1,5 @@
 /// Represents a sequence of numbers that also holds additional information, to generate a sequence of strings.
+/// TODO: update examples. They are now wrong.
 pub struct Sequence {
     /// String prefix
     prefix: String,
