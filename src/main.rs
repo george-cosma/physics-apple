@@ -4,6 +4,7 @@ use clap::Parser;
 use cli::{CLIArgs, Commands};
 use gui::{HEIGHT, WIDTH};
 use physics::generate_board;
+use sequence::Sequence;
 
 mod cli;
 mod gui;

@@ -1,18 +1,21 @@
 /// Represents a sequence of numbers that also holds additional information, to generate a sequence of strings.
-pub struct Sequence<'a> {
+pub struct Sequence {
     /// String prefix
-    pub prefix: &'a str,
+    prefix: String,
     /// String suffix
-    pub suffix: &'a str,
+    suffix: String,
     /// The start of the sequence
     start: usize,
     /// The (inclusive) end of the sequence.
     end: usize,
     /// Where currently in the sequence we are.
     current: usize,
+    /// If set to true, values from Sequence::next() will be padded with 0's so that all elements will be the same size as the biggest value in the sequence.
+    pad: bool,
+    pad_size: usize,
 }
 
-impl Sequence<'_> {
+impl Sequence {
     /// Create a new Sequence.
     /// prefix: Optional, currently unused, but can be used manually
     /// suffix: Optional, currently unused, but can be used manually
@@ -24,13 +27,15 @@ impl Sequence<'_> {
     /// let format = format!("{}{:0>2}{}", seq.prefix, seq.current, seq.suffix);
     /// assert_eq!(format, "frame_01.png");
     /// ```
-    pub fn new<'a>(prefix: &'a str, suffix: &'a str, start: usize, end: usize) -> Sequence<'a> {
+    pub fn new(prefix: &String, suffix: &String, start: usize, end: usize, pad: bool) -> Sequence {
         Sequence {
-            prefix: prefix,
-            suffix: suffix,
+            prefix: prefix.clone(),
+            suffix: suffix.clone(),
             start: start,
             end: end,
             current: start,
+            pad: pad,
+            pad_size: if pad { format!("{}", end).len() } else { 0 },
         }
     }
     /// Returns the current value of the sequence, and advances it.
@@ -49,12 +54,18 @@ impl Sequence<'_> {
     ///     assert_eq!(seq.current, 3);
     /// }
     /// ```
-    pub fn next(&mut self) -> Option<usize> {
+    pub fn next(&mut self) -> Option<String> {
         if self.current == self.end + 1 {
             return None;
         }
 
-        let output = self.current;
+        let output = format!(
+            "{}{:0>width$}{}",
+            self.prefix,
+            self.current,
+            self.suffix,
+            width = if self.pad { self.pad_size } else { 0 }
+        );
         self.current += 1;
         return Some(output);
     }
