@@ -1,4 +1,4 @@
-use std::{cell, fs::File, path::Path};
+use std::path::Path;
 
 use image::GenericImageView;
 
@@ -42,10 +42,7 @@ pub fn generate_board(file: &String) -> Board {
         board.load_static_field(field_path).unwrap();
     } else {
         // Create static field
-        println!(
-            "[Debug] Generating static attraction field for '{}'.",
-            file
-        );
+        println!("[Debug] Generating static attraction field for '{}'.", file);
 
         board.generate_static_field(get_attractors(img));
     }

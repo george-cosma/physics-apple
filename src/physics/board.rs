@@ -1,8 +1,8 @@
-use byteorder::{BigEndian, LittleEndian, ReadBytesExt, WriteBytesExt};
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 use std::{
     cell::RefCell,
     fs::File,
-    io::{Cursor, Error, Read, Write},
+    io::{Cursor, Error, Read},
     rc::Rc,
 };
 
@@ -74,7 +74,7 @@ impl Board {
     }
 
     pub fn random_particles(&mut self, amount: u32) {
-        for i in 0..amount {
+        for _ in 0..amount {
             let x = rand::thread_rng().gen_range(0..self.width);
             let y = rand::thread_rng().gen_range(0..self.heigth);
 

@@ -7,7 +7,7 @@ mod physics;
 mod sequence;
 
 // Rendering {
-use pixels::{Error, Pixels, SurfaceTexture};
+use pixels::{Pixels, SurfaceTexture};
 use winit::{
     dpi::LogicalSize,
     event::{Event, VirtualKeyCode},
@@ -34,12 +34,12 @@ fn main() {
                 handle_generate(file);
             }
         }
-        Commands::SimulateFile { file } => todo!(),
+        Commands::SimulateFile { file: _ } => todo!(),
         Commands::SimulateSequence {
-            prefix,
-            begin,
-            end,
-            suffix,
+            prefix: _,
+            begin: _,
+            end: _,
+            suffix: _,
         } => todo!(),
     }
 

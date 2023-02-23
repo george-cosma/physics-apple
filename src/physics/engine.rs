@@ -1,5 +1,3 @@
-use std::ops::Mul;
-
 use super::force::Force;
 
 pub const ATTRACTOR_MASS: f64 = 10.0;
