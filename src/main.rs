@@ -1,7 +1,12 @@
 #[macro_use]
 extern crate rustacuda;
 
-use std::{cell::RefCell, rc::Rc, thread};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+    sync::{Arc, Mutex},
+    thread,
+};
 
 use clap::Parser;
 use cli::{CLIArgs, Commands};
@@ -10,10 +15,10 @@ use physics::{generate_board, GenerateResult};
 use sequence::Sequence;
 
 mod cli;
+mod gpu;
 mod gui;
 mod physics;
 mod sequence;
-mod gpu;
 
 const USE_FPS: bool = true;
 const FPS: u128 = 30;
@@ -51,31 +56,32 @@ fn generate_and_save_field_paralel(files: Vec<String>) {
     let frames_per_thread = frames / threads;
 
     let mut handles = Vec::new();
-    
-    for i in 0..(threads - 1) {
-        let tfiles = files.clone();
-        let handle = thread::spawn(move || {
-            let start = i * frames_per_thread;
-            let end = (i + 1) * frames_per_thread - 1;
-            println!("{i}: {start} - {end}");
-            for j in start..=end {
-                generate_and_save_field(&tfiles[j]);
+
+    let seq_ref = Arc::new(Mutex::new(Sequence::new(
+        &"".to_string(),
+        &"".to_string(),
+        0,
+        frames - 1,
+        false,
+    )));
+
+    for i in 0..threads {
+        let seq_ref = Arc::clone(&seq_ref);
+        let files = files.clone();
+        let handle = thread::spawn(move || loop {
+            let mut seq = seq_ref.lock().unwrap();
+            let next = seq.next_number();
+            drop(seq);
+
+            if let Some(i) = next {
+                generate_and_save_field(&files[i]);
+            } else {
+                break;
             }
         });
 
         handles.push(handle);
     }
-
-    let handle = thread::spawn(move || {
-        let start = (threads - 1) * frames_per_thread;
-        let end = frames - 1;
-        println!("end: {start} - {end}");
-        for i in start..=end {
-            generate_and_save_field(&files[i]);
-        }
-    });
-
-    handles.push(handle);
 
     for handle in handles {
         handle.join().unwrap();

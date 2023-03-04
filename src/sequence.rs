@@ -71,6 +71,16 @@ impl Sequence {
         return Some(output);
     }
 
+    pub fn next_number(&mut self) -> Option<usize> {
+        if self.current == self.end + 1 {
+            return None;
+        }
+
+        let output = self.current;
+        self.current += 1;
+        return Some(output);
+    }
+
     /// Restart the sequence so that the current value is the "start" value.
     pub fn restart(&mut self) {
         self.current = self.start;

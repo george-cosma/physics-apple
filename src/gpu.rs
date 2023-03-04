@@ -4,7 +4,7 @@ use std::ffi::CString;
 use std::io::{stdin, Read};
 use std::thread::Thread;
 
-use crate::gui::{WIDTH, HEIGHT};
+use crate::gui::{HEIGHT, WIDTH};
 
 // WIDTH  = THREADS_X * BLOCKS.X
 // HEIGHT = THREADS_Y * BLOCKS.Y
@@ -18,7 +18,11 @@ const BLOCKS_Y: u32 = HEIGHT / THREADS_Y; // 15
 
 const THREADS: usize = (THREADS_X * THREADS_Y * BLOCKS_X * BLOCKS_Y) as usize;
 
-pub fn CUDA_generate_static_field(mass_product: f32, att_x: Vec<i32>, att_y: Vec<i32>) -> Result<(Vec<f32>, Vec<f32>), Box<dyn Error>> {
+pub fn CUDA_generate_static_field(
+    mass_product: f32,
+    att_x: Vec<i32>,
+    att_y: Vec<i32>,
+) -> Result<(Vec<f32>, Vec<f32>), Box<dyn Error>> {
     // Set up the context, load the module, and create a stream to run kernels in.
     rustacuda::init(CudaFlags::empty())?;
     let device = Device::get_device(0)?;

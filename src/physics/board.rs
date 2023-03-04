@@ -9,7 +9,10 @@ use std::{
 use rand::Rng;
 
 use super::{engine::gravitational_force, force::Force, particle::Particle};
-use crate::{physics::engine::{ATTRACTOR_MASS, PARTICLE_MASS}, gpu};
+use crate::{
+    gpu,
+    physics::engine::{ATTRACTOR_MASS, PARTICLE_MASS},
+};
 pub struct Board {
     pub width: u32,
     pub heigth: u32,
@@ -47,15 +50,16 @@ impl Board {
         }
     }
     pub fn CUDA_generate_static_field(&mut self, attractors: Vec<(u32, u32)>) {
-        
         let mut attr_x = vec![];
         let mut attr_y = vec![];
         for (a_x, a_y) in &attractors {
             attr_x.push(*a_x as i32);
             attr_y.push(*a_y as i32);
         }
-        
-        let (force_x, force_y) = gpu::CUDA_generate_static_field(PARTICLE_MASS * ATTRACTOR_MASS,attr_x,attr_y).unwrap();
+
+        let (force_x, force_y) =
+            gpu::CUDA_generate_static_field(PARTICLE_MASS * ATTRACTOR_MASS, attr_x, attr_y)
+                .unwrap();
 
         println!("[DEBUG] GPU PROCESSING DONE");
 
@@ -67,7 +71,7 @@ impl Board {
                 }
                 self.get_cell_mut(x, y).static_field = Force {
                     x_component: force_x[index],
-                    y_component: force_y[index]
+                    y_component: force_y[index],
                 }
             }
         }

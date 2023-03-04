@@ -1,4 +1,7 @@
-use std::{path::Path, error::{self, Error}};
+use std::{
+    error::{self, Error},
+    path::Path,
+};
 
 use image::GenericImageView;
 
@@ -12,10 +15,10 @@ pub mod particle;
 #[derive(PartialEq)]
 pub enum GenerateResult {
     FieldGenerated,
-    FieldLoaded
+    FieldLoaded,
 }
 
-pub fn generate_board(file: &String) -> Result<(Board,GenerateResult), Box<dyn Error>> {
+pub fn generate_board(file: &String) -> Result<(Board, GenerateResult), Box<dyn Error>> {
     println!("[Debug] Generating board for '{}'.", file);
 
     // Load Image
@@ -47,10 +50,9 @@ pub fn generate_board(file: &String) -> Result<(Board,GenerateResult), Box<dyn E
 
         let load_result = board.load_static_field(field_path);
         match load_result {
-            Ok(_) => return Ok((board, GenerateResult::FieldLoaded)) ,
+            Ok(_) => return Ok((board, GenerateResult::FieldLoaded)),
             Err(_) => println!("Corrupted field '{file}'"),
         }
-         
     }
     // Create static field
     println!("[Debug] Generating static attraction field for '{}'.", file);
