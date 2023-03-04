@@ -15,6 +15,9 @@ pub enum Commands {
     Generate {
         /// The paths of the files to generate the static field for.
         files: Vec<String>,
+        /// How many threads to use
+        #[arg(short, long, default_value_t = 1)]
+        threads: usize,
     },
 
     /// View the static field of a file.

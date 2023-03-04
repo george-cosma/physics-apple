@@ -29,11 +29,8 @@ fn main() {
     let args = CLIArgs::parse();
 
     match args.command {
-        Commands::Generate { files } => {
-            // for file in &files {
-            //     generate_and_save_field(file);
-            // }
-            generate_and_save_field_paralel(files);
+        Commands::Generate { files, threads } => {
+            generate_and_save_field_paralel(files, threads);
         }
         Commands::ViewField { file } => {
             view_field(&file);
@@ -50,10 +47,14 @@ fn main() {
     }
 }
 
-fn generate_and_save_field_paralel(files: Vec<String>) {
-    let threads = thread::available_parallelism().unwrap().get();
+fn generate_and_save_field_paralel(files: Vec<String>, user_threads: usize) {
+    let max_threads = thread::available_parallelism().unwrap().get();
+    let threads = if user_threads > max_threads {
+        max_threads
+    } else {
+        user_threads
+    };
     let frames = files.len();
-    let frames_per_thread = frames / threads;
 
     let mut handles = Vec::new();
 
