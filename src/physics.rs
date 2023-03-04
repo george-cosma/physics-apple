@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, error::{self, Error}};
 
 use image::GenericImageView;
 
@@ -9,7 +9,13 @@ mod engine;
 pub mod force;
 pub mod particle;
 
-pub fn generate_board(file: &String) -> Board {
+#[derive(PartialEq)]
+pub enum GenerateResult {
+    FieldGenerated,
+    FieldLoaded
+}
+
+pub fn generate_board(file: &String) -> Result<(Board,GenerateResult), Box<dyn Error>> {
     println!("[Debug] Generating board for '{}'.", file);
 
     // Load Image
@@ -39,14 +45,18 @@ pub fn generate_board(file: &String) -> Board {
     if Path::exists(&field_path) {
         println!("[Debug] Found static attraction field for '{}'.", file);
 
-        board.load_static_field(field_path).unwrap();
-    } else {
-        // Create static field
-        println!("[Debug] Generating static attraction field for '{}'.", file);
-
-        board.generate_static_field(get_attractors(img));
+        let load_result = board.load_static_field(field_path);
+        match load_result {
+            Ok(_) => return Ok((board, GenerateResult::FieldLoaded)) ,
+            Err(_) => println!("Corrupted field '{file}'"),
+        }
+         
     }
-    return board;
+    // Create static field
+    println!("[Debug] Generating static attraction field for '{}'.", file);
+
+    board.CUDA_generate_static_field(get_attractors(img));
+    return Ok((board, GenerateResult::FieldGenerated));
 }
 
 fn get_attractors(img: image::DynamicImage) -> Vec<(u32, u32)> {

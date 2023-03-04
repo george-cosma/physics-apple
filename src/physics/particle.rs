@@ -5,9 +5,9 @@ use super::{
 
 #[derive(Clone)]
 pub struct Particle {
-    pub x: f64,
-    pub y: f64,
-    pub velocity: Force<f64>,
+    pub x: f32,
+    pub y: f32,
+    pub velocity: Force<f32>,
 }
 
 impl Particle {
@@ -17,7 +17,7 @@ impl Particle {
         return (render_x, render_y);
     }
 
-    pub fn update_velocity(&mut self, total_force: Force<f64>) {
+    pub fn update_velocity(&mut self, total_force: Force<f32>) {
         // F = M * A , so the acceleration is
         // A = F / M
         let acceleration = total_force / PARTICLE_MASS;

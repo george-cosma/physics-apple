@@ -9,7 +9,7 @@ use std::{
 use rand::Rng;
 
 use super::{engine::gravitational_force, force::Force, particle::Particle};
-use crate::physics::engine::{ATTRACTOR_MASS, PARTICLE_MASS};
+use crate::{physics::engine::{ATTRACTOR_MASS, PARTICLE_MASS}, gpu};
 pub struct Board {
     pub width: u32,
     pub heigth: u32,
@@ -21,7 +21,7 @@ pub struct Board {
 pub struct BoardCell {
     pub x: u32,
     pub y: u32,
-    pub static_field: Force<f64>,
+    pub static_field: Force<f32>,
     pub particles: Vec<Rc<RefCell<Particle>>>,
 }
 impl BoardCell {
@@ -37,7 +37,7 @@ impl BoardCell {
 impl Board {
     pub fn generate_static_field(&mut self, attractors: Vec<(u32, u32)>) {
         for y in 0..self.heigth {
-            println!("[DEBUG] y = {}", y);
+            // println!("[DEBUG] y = {}", y);
             for x in 0..self.width {
                 for (a_x, a_y) in &attractors {
                     self.get_cell_mut(x, y).static_field +=
@@ -45,6 +45,34 @@ impl Board {
                 }
             }
         }
+    }
+    pub fn CUDA_generate_static_field(&mut self, attractors: Vec<(u32, u32)>) {
+        
+        let mut attr_x = vec![];
+        let mut attr_y = vec![];
+        for (a_x, a_y) in &attractors {
+            attr_x.push(*a_x as i32);
+            attr_y.push(*a_y as i32);
+        }
+        
+        let (force_x, force_y) = gpu::CUDA_generate_static_field(PARTICLE_MASS * ATTRACTOR_MASS,attr_x,attr_y).unwrap();
+
+        println!("[DEBUG] GPU PROCESSING DONE");
+
+        for y in 0..self.heigth {
+            for x in 0..self.width {
+                let index = (x + y * self.width) as usize;
+                if force_y[index] < 0.0 {
+                    // println!("Y Force at copy can be negative");
+                }
+                self.get_cell_mut(x, y).static_field = Force {
+                    x_component: force_x[index],
+                    y_component: force_y[index]
+                }
+            }
+        }
+
+        println!("[DEBUG] Data copied");
     }
 
     pub fn update(&mut self) {
@@ -84,8 +112,8 @@ impl Board {
 
     pub fn add_particle(&mut self, x: u32, y: u32) {
         let particle = Particle {
-            x: x as f64,
-            y: y as f64,
+            x: x as f32,
+            y: y as f32,
             velocity: Force::default(),
         };
 
@@ -121,7 +149,6 @@ impl Board {
                 println!("[ERROR] Vector somehow breaks laws of physics. Cell[{}][{}] has force (x: {}, y:{})", cell.x, cell.y, cell.static_field.x_component, cell.static_field.y_component);
                 [0xff, 0xff, 0xff, 0xff]
             };
-
             pixel.copy_from_slice(&color);
         }
     }
@@ -151,8 +178,8 @@ impl Board {
 
         for y in 0..self.heigth {
             for x in 0..self.width {
-                let force_x = reader.read_f64::<LittleEndian>()?;
-                let force_y = reader.read_f64::<LittleEndian>()?;
+                let force_x = reader.read_f32::<LittleEndian>()?;
+                let force_y = reader.read_f32::<LittleEndian>()?;
                 self.get_cell_mut(x, y).static_field = Force {
                     x_component: force_x,
                     y_component: force_y,
@@ -168,8 +195,8 @@ impl Board {
         for y in 0..self.heigth {
             for x in 0..self.width {
                 let force = self.get_cell(x, y).static_field.clone();
-                file.write_f64::<LittleEndian>(force.x_component)?;
-                file.write_f64::<LittleEndian>(force.y_component)?;
+                file.write_f32::<LittleEndian>(force.x_component)?;
+                file.write_f32::<LittleEndian>(force.y_component)?;
             }
         }
         return Ok(());

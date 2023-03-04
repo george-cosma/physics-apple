@@ -19,7 +19,7 @@
                     "kind": "bin"
                 }
             },
-            "args": [],
+            "args": ["view-field", "./frames/frame.0488.png"],
             "cwd": "${workspaceFolder}"
         },
         {
