@@ -46,7 +46,7 @@ fn main() {
 }
 
 fn generate_and_save_field_paralel(files: Vec<String>) {
-    let threads = thread::available_parallelism().unwrap().get() / 2;
+    let threads = thread::available_parallelism().unwrap().get();
     let frames = files.len();
     let frames_per_thread = frames / threads;
 
@@ -55,10 +55,11 @@ fn generate_and_save_field_paralel(files: Vec<String>) {
     for i in 0..(threads - 1) {
         let tfiles = files.clone();
         let handle = thread::spawn(move || {
-            let start = i * frames_per_thread + 1;
-            let end = (i + 1) * frames_per_thread;
-            for i in start..=end {
-                generate_and_save_field(&tfiles[i]);
+            let start = i * frames_per_thread;
+            let end = (i + 1) * frames_per_thread - 1;
+            println!("{i}: {start} - {end}");
+            for j in start..=end {
+                generate_and_save_field(&tfiles[j]);
             }
         });
 
@@ -66,8 +67,9 @@ fn generate_and_save_field_paralel(files: Vec<String>) {
     }
 
     let handle = thread::spawn(move || {
-        let start = (threads - 1) * frames_per_thread + 1;
-        let end = frames;
+        let start = (threads - 1) * frames_per_thread;
+        let end = frames - 1;
+        println!("end: {start} - {end}");
         for i in start..=end {
             generate_and_save_field(&files[i]);
         }

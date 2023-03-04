@@ -55,7 +55,7 @@ pub fn generate_board(file: &String) -> Result<(Board,GenerateResult), Box<dyn E
     // Create static field
     println!("[Debug] Generating static attraction field for '{}'.", file);
 
-    board.CUDA_generate_static_field(get_attractors(img));
+    board.generate_static_field(get_attractors(img));
     return Ok((board, GenerateResult::FieldGenerated));
 }
 
