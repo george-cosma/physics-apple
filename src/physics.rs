@@ -42,14 +42,13 @@ pub fn generate_board(file: &String) -> Result<(Board, GenerateResult), Box<dyn 
 
     // Try loading static field
     match update_static_field(file, &mut board, img) {
-        Ok(generate_result) => { 
+        Ok(generate_result) => {
             return Ok((board, generate_result));
         }
         Err(err) => {
             panic!();
         }
     }
-
 }
 
 pub fn load_image(filename: &String) -> image::DynamicImage {
@@ -58,26 +57,36 @@ pub fn load_image(filename: &String) -> image::DynamicImage {
     img
 }
 
-pub fn update_static_field(frame_filename: &String, board: &mut Board, img: image::DynamicImage) -> Result<GenerateResult, Box<dyn Error>> {
+pub fn update_static_field(
+    frame_filename: &String,
+    board: &mut Board,
+    img: image::DynamicImage,
+) -> Result<GenerateResult, Box<dyn Error>> {
     let str_field_path = format!("{}.field", frame_filename);
     let field_path = Path::new(&str_field_path);
     if Path::exists(&field_path) {
-        println!("[Debug] Found static attraction field for '{}'.", frame_filename);
+        println!(
+            "[Debug] Found static attraction field for '{}'.",
+            frame_filename
+        );
 
         let load_result = board.load_static_field(field_path);
         match load_result {
             Ok(_) => {
                 if !board.is_field_corrupted() {
-                    return Ok(GenerateResult::FieldLoaded)
+                    return Ok(GenerateResult::FieldLoaded);
                 } else {
                     board.clear_static_field();
                 }
             }
-            Err(_) => ()
+            Err(_) => (),
         }
         println!("Corrupted field '{frame_filename}'")
     }
-    println!("[Debug] Generating static attraction field for '{}'.", frame_filename);
+    println!(
+        "[Debug] Generating static attraction field for '{}'.",
+        frame_filename
+    );
     board.generate_static_field(get_attractors(img));
 
     Ok(GenerateResult::FieldGenerated)

@@ -17,6 +17,27 @@ impl Particle {
         return (render_x, render_y);
     }
 
+    pub fn is_inside(&self, max_x: u32, max_y: u32) -> bool {
+        let unclamped_x = self.x.round() as i32;
+        let unclamped_y = self.y.round() as i32;
+
+        let (render_x, render_y) = self.get_render_position(max_x, max_y);
+        return (unclamped_x == (render_x as i32)) && (unclamped_y == (render_y as i32));
+    }
+
+    pub fn is_heading_inside(&self, max_x: i32, max_y: i32) -> bool {
+        let unclamped_x = self.x.round() as i32;
+        let unclamped_y = self.y.round() as i32;
+
+        let heading_inside_x = (unclamped_x < 0 && self.velocity.x_component >= 0.0)
+            || (unclamped_x > max_x && self.velocity.x_component <= 0.0);
+
+        let heading_inside_y = (unclamped_y < 0 && self.velocity.y_component > 0.0)
+            || (unclamped_y > max_y && self.velocity.y_component <= 0.0);
+
+        return heading_inside_x && heading_inside_y;
+    }
+
     pub fn update_velocity(&mut self, total_force: Force<f32>) {
         // F = M * A , so the acceleration is
         // A = F / M

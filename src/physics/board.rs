@@ -53,7 +53,7 @@ impl Board {
     pub fn clear_static_field(&mut self) {
         for y in 0..self.heigth {
             for x in 0..self.width {
-                self.get_cell_mut(x,y).static_field = Force::default();
+                self.get_cell_mut(x, y).static_field = Force::default();
             }
         }
     }
@@ -91,6 +91,12 @@ impl Board {
         // Update velocities of particles
         for particle_ref in &self.particles {
             let mut particle = particle_ref.borrow_mut();
+
+            if !particle.is_inside(self.width - 1, self.heigth - 1)
+                && !particle.is_heading_inside((self.width - 1) as i32, (self.heigth - 1) as i32)
+            {
+                particle.velocity = Force::default();
+            }
             let (x, y) = particle.get_render_position(self.width - 1, self.heigth - 1);
             let force = self.get_cell(x, y).static_field.clone(); // + attraction to other particles, in future
             particle.update_velocity(force);

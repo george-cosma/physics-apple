@@ -11,7 +11,7 @@ use std::{
 use clap::Parser;
 use cli::{CLIArgs, Commands};
 use gui::{HEIGHT, WIDTH};
-use physics::{generate_board, GenerateResult, load_image};
+use physics::{generate_board, load_image, GenerateResult};
 use sequence::Sequence;
 
 mod cli;
@@ -44,8 +44,14 @@ fn main() {
             end,
             suffix,
         } => {
-            simulate_sequence(Sequence::new(&prefix, &suffix, begin as usize, end as usize, true));
-        },
+            simulate_sequence(Sequence::new(
+                &prefix,
+                &suffix,
+                begin as usize,
+                end as usize,
+                true,
+            ));
+        }
     }
 }
 
@@ -143,19 +149,25 @@ fn simulate_file(file: &String) {
     );
 }
 
-const SEQ_ITER_PER_FRAME:usize = 10; 
+const SEQ_ITER_PER_FRAME: usize = 40;
 
 fn simulate_sequence(mut seq: Sequence) {
-
-    let board_ref = Rc::new(RefCell::new(generate_board(&seq.next().unwrap()).unwrap().0));
-    board_ref.borrow_mut().random_particles(WIDTH * HEIGHT / 8);
+    let board_ref = Rc::new(RefCell::new(
+        generate_board(&seq.next().unwrap()).unwrap().0,
+    ));
+    board_ref.borrow_mut().random_particles(WIDTH * HEIGHT / 16);
 
     let boar_ref_clone = board_ref.clone();
     gui::run(
         move |buffer| {
             board_ref.borrow().draw_particles(buffer);
             if let Some(filename) = seq.next() {
-                physics::update_static_field(&filename, &mut board_ref.borrow_mut(), load_image(&filename)).unwrap();
+                physics::update_static_field(
+                    &filename,
+                    &mut board_ref.borrow_mut(),
+                    load_image(&filename),
+                )
+                .unwrap();
             }
         },
         move || {
