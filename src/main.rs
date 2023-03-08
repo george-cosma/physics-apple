@@ -156,7 +156,7 @@ fn simulate_file(file: &String) {
     );
 }
 
-const SEQ_ITER_PER_FRAME: usize = 40;
+const SEQ_ITER_PER_FRAME: usize = 20;
 // How many frames to output per input frame.
 // On Bad Apple, this will make the video from 30 fps to 60fps
 const FRAME_HOLD: usize = 2;
