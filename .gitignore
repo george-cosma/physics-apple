@@ -2,3 +2,4 @@
 /frames/*.png
 /frames/*.field
 Cargo.lock
+/render/*

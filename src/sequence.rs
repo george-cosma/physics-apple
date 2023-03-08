@@ -81,6 +81,13 @@ impl Sequence {
         return Some(output);
     }
 
+    pub fn end(&self) -> usize {
+        return self.end;
+    }
+    pub fn start(&self) -> usize {
+        return self.start;
+    }
+
     /// Restart the sequence so that the current value is the "start" value.
     pub fn restart(&mut self) {
         self.current = self.start;

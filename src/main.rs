@@ -3,6 +3,7 @@ extern crate rustacuda;
 
 use std::{
     cell::RefCell,
+    path::Path,
     rc::Rc,
     sync::{Arc, Mutex},
     thread,
@@ -43,14 +44,20 @@ fn main() {
             begin,
             end,
             suffix,
+            save_to_file,
         } => {
-            simulate_sequence(Sequence::new(
+            let seq = Sequence::new(
                 &prefix,
                 &suffix,
                 begin as usize,
                 end as usize,
                 true,
-            ));
+            );
+            if save_to_file {
+                simulate_and_save_sequence(seq)
+            } else {
+                simulate_sequence(seq);
+            }
         }
     }
 }
@@ -150,6 +157,12 @@ fn simulate_file(file: &String) {
 }
 
 const SEQ_ITER_PER_FRAME: usize = 40;
+// How many frames to output per input frame.
+// On Bad Apple, this will make the video from 30 fps to 60fps
+const FRAME_HOLD: usize = 2;
+
+// How many frames to keep the simulation going after the last input frame has been simulated
+const END_FRAMES: usize = 60 * 10;
 
 fn simulate_sequence(mut seq: Sequence) {
     let board_ref = Rc::new(RefCell::new(
@@ -176,4 +189,47 @@ fn simulate_sequence(mut seq: Sequence) {
             }
         },
     );
+}
+
+fn simulate_and_save_sequence(mut seq: Sequence) {
+    let mut board = generate_board(&seq.next().unwrap()).unwrap().0;
+    board.random_particles(WIDTH * HEIGHT / 16);
+
+    let mut buffer_array = [0u8; (WIDTH * HEIGHT * 4) as usize];
+    let buffer = buffer_array.as_mut_slice();
+
+    let max_frames = (seq.end() - seq.start() + 1) * FRAME_HOLD + END_FRAMES;
+    let frame_count_size = format!("{}", max_frames).len();
+
+    let mut frame_hold_counter = FRAME_HOLD;
+
+    for current_frame in 1..=max_frames {
+        // Render to buffer
+        board.draw_particles(buffer);
+
+        // Save
+        let path_str = format!(
+            "./render/render.{:0>width$}.png",
+            current_frame,
+            width = frame_count_size
+        );
+        let path = Path::new(&path_str);
+        image::save_buffer(path, buffer, WIDTH, HEIGHT, image::ColorType::Rgba8).unwrap();
+
+        // Update particles
+        for _ in 0..SEQ_ITER_PER_FRAME {
+            board.update();
+        }
+
+        // Update field
+        if frame_hold_counter != 1 {
+            frame_hold_counter -= 1;
+        } else {
+            frame_hold_counter = FRAME_HOLD;
+
+            if let Some(filename) = seq.next() {
+                physics::update_static_field(&filename, &mut board, load_image(&filename)).unwrap();
+            }
+        }
+    }
 }

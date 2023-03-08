@@ -49,5 +49,8 @@ pub enum Commands {
         /// The suffix of the files' names.
         #[arg(index = 4)]
         suffix: String,
+
+        #[arg(short, long)]
+        save_to_file: bool,
     },
 }
