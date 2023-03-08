@@ -49,6 +49,14 @@ impl Board {
             }
         }
     }
+
+    pub fn clear_static_field(&mut self) {
+        for y in 0..self.heigth {
+            for x in 0..self.width {
+                self.get_cell_mut(x,y).static_field = Force::default();
+            }
+        }
+    }
     pub fn CUDA_generate_static_field(&mut self, attractors: Vec<(u32, u32)>) {
         let mut attr_x = vec![];
         let mut attr_y = vec![];
@@ -133,6 +141,15 @@ impl Board {
 
     pub fn get_cell_mut(&mut self, x: u32, y: u32) -> &mut BoardCell {
         return &mut self.cells[(x + y * self.width) as usize];
+    }
+
+    pub fn is_field_corrupted(&self) -> bool {
+        for cell in self.cells.iter() {
+            if cell.static_field.x_component.is_nan() || cell.static_field.y_component.is_nan() {
+                return true;
+            }
+        }
+        return false;
     }
 
     pub fn draw_static_field(&self, pixels: &mut [u8]) {
