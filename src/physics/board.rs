@@ -40,7 +40,7 @@ impl BoardCell {
 impl Board {
     pub fn generate_static_field(&mut self, attractors: Vec<(u32, u32)>) {
         for y in 0..self.heigth {
-            // println!("[DEBUG] y = {}", y);
+            println!("[DEBUG] y = {}", y);
             for x in 0..self.width {
                 for (a_x, a_y) in &attractors {
                     self.get_cell_mut(x, y).static_field +=

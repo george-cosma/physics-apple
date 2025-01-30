@@ -11,9 +11,9 @@ use crate::gui::{HEIGHT, WIDTH};
 // THREADS_X * THREADS_Y should be divisible by 32, and between 256 and 512
 // WIDTH = 480
 // HEIGHT = 360
-const THREADS_X: u32 = 32;
+const THREADS_X: u32 = 4;
 const BLOCKS_X: u32 = WIDTH / THREADS_X; // 45
-const THREADS_Y: u32 = 8;
+const THREADS_Y: u32 = 16;
 const BLOCKS_Y: u32 = HEIGHT / THREADS_Y; // 15
 
 const THREADS: usize = (THREADS_X * THREADS_Y * BLOCKS_X * BLOCKS_Y) as usize;

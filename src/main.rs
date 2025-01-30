@@ -51,7 +51,7 @@ fn main() {
                 &suffix,
                 begin as usize,
                 end as usize,
-                true,
+                false,
             );
             if save_to_file {
                 simulate_and_save_sequence(seq)
@@ -159,10 +159,10 @@ fn simulate_file(file: &String) {
 const SEQ_ITER_PER_FRAME: usize = 20;
 // How many frames to output per input frame.
 // On Bad Apple, this will make the video from 30 fps to 60fps
-const FRAME_HOLD: usize = 2;
+const FRAME_HOLD: usize = 1;
 
 // How many frames to keep the simulation going after the last input frame has been simulated
-const END_FRAMES: usize = 60 * 10;
+const END_FRAMES: usize = 48 * 5;
 
 fn simulate_sequence(mut seq: Sequence) {
     let board_ref = Rc::new(RefCell::new(
@@ -195,7 +195,7 @@ fn simulate_and_save_sequence(mut seq: Sequence) {
     let mut board = generate_board(&seq.next().unwrap()).unwrap().0;
     board.random_particles(WIDTH * HEIGHT / 16);
 
-    let mut buffer_array = [0u8; (WIDTH * HEIGHT * 4) as usize];
+    let mut buffer_array = Box::new([0u8; (WIDTH * HEIGHT * 4) as usize]);
     let buffer = buffer_array.as_mut_slice();
 
     let max_frames = (seq.end() - seq.start() + 1) * FRAME_HOLD + END_FRAMES;

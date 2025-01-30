@@ -87,7 +87,7 @@ pub fn update_static_field(
         "[Debug] Generating static attraction field for '{}'.",
         frame_filename
     );
-    board.generate_static_field(get_attractors(img));
+    board.CUDA_generate_static_field(get_attractors(img));
 
     Ok(GenerateResult::FieldGenerated)
 }
