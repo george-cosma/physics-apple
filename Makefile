@@ -13,6 +13,7 @@ run_simulation:
 	cargo run --profile release -- simulate-sequence ./frames/
 
 save: make_shader make_frames make_fields
+	mkdir -p render
 	cargo run --profile release -- simulate-sequence ./frames/ --save-to-file
 	ffmpeg -f image2 -r 25 -i 'render/render.%03d.png' -vcodec libx264 -crf 22 output.mp4
 
@@ -21,3 +22,5 @@ clean:
 	rm -rf ./frames/*.png.field
 	rm -f ./src/shaders/static-field.ptx
 	rm -f ./output.mp4
+	rm -rf ./render/*.png
+	cargo clean

@@ -32,13 +32,15 @@ Prerequisites:
 - NVIDIA CUDA: <https://developer.nvidia.com/cuda-downloads>
 - ffmpeg: <https://www.ffmpeg.org/>
 - Visual Studio (required for NVIDIA CUDA) with C/C++ Development tools
+- NVIDIA GPU
 
 You will also need to run a few commands to set the environment varaibles so that `rustacuda`
 compiles. Make sure to modify the paths to that of your actual system.
 
 ```bash
-export CUDA_LIBRARY_PATH="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\lib\x64" # Make sure to modify the path
 export PATH=$PATH:"/c/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.41.34120/bin/Hostx64/x64" # Make sure to modify the path
+# Optional, though you might need to restart your system otherwise if you just installed CUDA
+export CUDA_LIBRARY_PATH="C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v12.8\lib\x64" # Make sure to modify the path
 ```
 
 To run realtime simulation:
@@ -52,6 +54,9 @@ To save simulation to file (saved as ./output.mp4):
 ```bash
 make save
 ```
+
+I've found that Windows Media Player has issues playing videos this small. You might need use VLC or
+Visual Studio Code. Somehow VS Code plays it the best :D
 
 To clean up:
 
