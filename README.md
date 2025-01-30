@@ -70,7 +70,8 @@ match the video. Feel free to modify the `SCALE` as well, as needed.
 
 Other parameters can be found all over the code. Rendering parameters are found in `main.rs`.
 
-WARNING! Big video files can take hours to days to generate their fields.
+WARNING! Big video files can take hours to days to generate their fields. The Bad Apple video took
+me at least 24 hours to render from start to finish.
 
 ## Other questions?
 
