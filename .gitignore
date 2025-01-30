@@ -5,3 +5,4 @@ Cargo.lock
 /render/*
 /target-ra
 output.mp4
+*.ptx
