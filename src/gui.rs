@@ -2,14 +2,14 @@ use pixels::{Pixels, SurfaceTexture};
 use winit::{
     dpi::LogicalSize,
     event::{Event, WindowEvent},
-    event_loop::{ControlFlow, EventLoop},
+    event_loop::EventLoop,
     keyboard::KeyCode,
     window::{Window, WindowBuilder},
 };
 use winit_input_helper::WinitInputHelper;
 
-pub const WIDTH: u32 = 804;
-pub const HEIGHT: u32 = 720;
+pub const WIDTH: u32 = 128;
+pub const HEIGHT: u32 = 128;
 
 pub const SCALE: f64 = 2.0;
 

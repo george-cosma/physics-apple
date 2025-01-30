@@ -30,5 +30,5 @@ while [[ 1 -eq 1 ]]; do
 		PREV_DONE=$DONE
 	fi
 	PREV=$CURR
-	sleep 120
+	sleep 15
 done

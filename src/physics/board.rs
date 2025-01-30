@@ -40,7 +40,7 @@ impl BoardCell {
 impl Board {
     pub fn generate_static_field(&mut self, attractors: Vec<(u32, u32)>) {
         for y in 0..self.heigth {
-            println!("[DEBUG] y = {}", y);
+            // println!("[DEBUG] y = {}", y);
             for x in 0..self.width {
                 for (a_x, a_y) in &attractors {
                     self.get_cell_mut(x, y).static_field +=
@@ -57,7 +57,7 @@ impl Board {
             }
         }
     }
-    pub fn CUDA_generate_static_field(&mut self, attractors: Vec<(u32, u32)>) {
+    pub fn cuda_generate_static_field(&mut self, attractors: Vec<(u32, u32)>) {
         let mut attr_x = vec![];
         let mut attr_y = vec![];
         for (a_x, a_y) in &attractors {
@@ -66,7 +66,7 @@ impl Board {
         }
 
         let (force_x, force_y) =
-            gpu::CUDA_generate_static_field(PARTICLE_MASS * ATTRACTOR_MASS, attr_x, attr_y)
+            gpu::cuda_generate_static_field(PARTICLE_MASS * ATTRACTOR_MASS, attr_x, attr_y)
                 .unwrap();
 
         println!("[DEBUG] GPU PROCESSING DONE");
@@ -121,8 +121,8 @@ impl Board {
 
     pub fn random_particles(&mut self, amount: u32) {
         for _ in 0..amount {
-            let x = rand::thread_rng().gen_range(0..self.width);
-            let y = rand::thread_rng().gen_range(0..self.heigth);
+            let x = rand::rng().random_range(0..self.width);
+            let y = rand::rng().random_range(0..self.heigth);
 
             self.add_particle(x, y);
         }
@@ -197,7 +197,10 @@ impl Board {
         }
     }
 
-    pub fn load_static_field(&mut self, field_path: &std::path::Path) -> Result<(), Error> {
+    pub fn load_static_field(
+        &mut self,
+        field_path: &std::path::Path,
+    ) -> Result<(), std::io::Error> {
         let mut file = File::open(field_path)?;
         let mut bytes: Vec<u8> = vec![];
         file.read_to_end(&mut bytes)?;
@@ -227,6 +230,14 @@ impl Board {
             }
         }
         return Ok(());
+    }
+
+    pub fn to_field(self) -> Vec<Force<f32>> {
+        return self
+            .cells
+            .into_iter()
+            .map(|cell| cell.static_field)
+            .collect();
     }
 }
 

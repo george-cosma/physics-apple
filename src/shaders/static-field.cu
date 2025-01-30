@@ -1,43 +1,37 @@
 extern "C" __constant__ float G = 1.0 / 1000.0;
 
-extern "C" __global__ void gravity(const float mass_product, const int* x2, const int* y2, const int attractors, float* out_x, float* out_y) {
+extern "C" __global__ void gravity(const float mass_product,
+                                   const int* x2,
+                                   const int* y2,
+                                   const int attractors,
+                                   float* out_x,
+                                   float* out_y,
+                                   const int width,
+                                   const int height) {
     const int x1 = threadIdx.x + blockIdx.x * blockDim.x;
     const int y1 = threadIdx.y + blockIdx.y * blockDim.y;
 
-    // int blockId  = blockIdx.x + blockIdx.y * gridDim.x;
-    // int threadId = blockId * (blockDim.x * blockDim.y) 
-    //                 + (threadIdx.y * blockDim.x) + threadIdx.x;
-
-    const int index = (threadIdx.x + blockIdx.x * blockDim.x) + (threadIdx.y + blockIdx.y * blockDim.y) * gridDim.x * blockDim.x;
-    // if (index == -1) {
-    //     printf("(%d, %d)", x1, y1);
-    // }
-    // printf("%d, ", index);
-    // printf("%d\n", gridDim.x * blockDim.x);
-    // if (blockIdx.x != 0 || blockIdx.y != 0) {
-    //     return;
-    // }
-    // printf("Putting (%d, %d) at index %d.\n", x1, y1, index);
-
-
-    for (int i = 0; i < attractors; i++) {
-        const float rx = x2[i] - x1;
-        const float ry = y2[i] - y1; 
-        const float radius_squared = rx * rx + ry * ry;
-
-        if (radius_squared != 0.0) {
-            const float cos_alpha = rx / radius_squared;
-            const float sin_alpha = ry / radius_squared;
-            
-            const float prev_x = out_x[index];
-            const float prev_y = out_y[index];
-            
-            out_x[index] = prev_x + cos_alpha * (1.0 / 1000.0) * mass_product / radius_squared;
-            out_y[index] = prev_y + sin_alpha * (1.0 / 1000.0) * mass_product / radius_squared;
-        }
+    if (x1 >= width || y1 >= height) {
+        return;
     }
 
-    // if (out_x[index] == 0.0) {
-    //     printf("Y is 0.");
-    // }
+    const int index = x1 + y1 * width;
+
+    float result_x = 0.0;
+    float result_y = 0.0;
+    for (int i = 0; i < attractors; i++) {
+        const float rx = x2[i] - x1;
+        const float ry = y2[i] - y1;
+        const float radius_squared = rx * rx + ry * ry;
+
+        const float inv_radius_squared = (radius_squared != 0.0) ? 1.0 / radius_squared : 0.0;
+        const float cos_alpha = rx * inv_radius_squared;
+        const float sin_alpha = ry * inv_radius_squared;
+
+        result_x += cos_alpha * G * mass_product * inv_radius_squared;
+        result_y += sin_alpha * G * mass_product * inv_radius_squared;
+    }
+
+    out_x[index] = result_x;
+    out_y[index] = result_y;
 }

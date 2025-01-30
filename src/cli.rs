@@ -2,7 +2,7 @@ use clap::{command, Parser, Subcommand};
 
 /// A program to generate a particle-based simulation. You can exit with ESC or Q.
 #[derive(Parser, Debug)]
-#[command(author, version, about)]
+#[command(version, about)]
 pub struct CLIArgs {
     #[command(subcommand)]
     pub command: Commands,
@@ -10,14 +10,18 @@ pub struct CLIArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
-    /// Generate the static field for a file.
+    /// Generate the static field for an entire directory.
     #[command(arg_required_else_help = true)]
     Generate {
-        /// The paths of the files to generate the static field for.
-        files: Vec<String>,
-        /// How many threads to use
-        #[arg(short, long, default_value_t = 1)]
-        threads: usize,
+        /// Path to directory containing the desired files. Program will only generate files with the
+        /// .png extension.
+        path: String,
+        /// How many threads to use. Has no effect if processing is done on the GPU. Default: Maximum
+        #[arg(short, long)]
+        threads: Option<usize>,
+        /// Use the GPU to generate the static field. Only supports NVIDIA GPUs.
+        #[arg(short, long)]
+        gpu: bool,
     },
 
     /// View the static field of a file.
@@ -34,22 +38,15 @@ pub enum Commands {
         file: String,
     },
 
-    /// Simulate a sequence of files. The files' format is <prefix><index><suffix>.
+    /// Simulate a sequence of files from a directory by their alphabetical order. Make sure the
+    /// files have leading zeros whe numbered.
     #[command(arg_required_else_help = true)]
     SimulateSequence {
-        /// The prefix of the files' names.
-        #[arg(index = 1)]
-        prefix: String,
-        /// The first file index in the sequence.
-        #[arg(index = 2)]
-        begin: u32,
-        /// The last file index in the sequence.
-        #[arg(index = 3)]
-        end: u32,
-        /// The suffix of the files' names.
-        #[arg(index = 4)]
-        suffix: String,
+        /// Path to directory containing the desired files. Program will simulate files with the
+        /// .field extension.
+        path: String,
 
+        /// Enable saving the simulation to a file.
         #[arg(short, long)]
         save_to_file: bool,
     },

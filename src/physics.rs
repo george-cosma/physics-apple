@@ -1,7 +1,4 @@
-use std::{
-    error::{self, Error},
-    path::Path,
-};
+use std::{error::Error, path::Path};
 
 use image::GenericImageView;
 
@@ -13,12 +10,25 @@ pub mod force;
 pub mod particle;
 
 #[derive(PartialEq)]
-pub enum GenerateResult {
+pub enum FieldLoadOutcome {
+    /// The static attraction field was just generated.
     FieldGenerated,
+    /// An existing static attraction field was loaded.
     FieldLoaded,
 }
 
-pub fn generate_board(file: &String) -> Result<(Board, GenerateResult), Box<dyn Error>> {
+/// Generates a board from an image file. The board will have the same dimensions as the image.
+///
+/// # Arguments
+/// - file: The path to the image file.
+///
+/// # Returns
+/// A tuple containing the generated board and the outcome of the field loading. The field loading
+/// outcome can be used to determine if the field was generated or loaded from disk.
+pub fn generate_board(
+    file: &str,
+    use_gpu: bool,
+) -> Result<(Board, FieldLoadOutcome), Box<dyn Error>> {
     println!("[Debug] Generating board for '{}'.", file);
 
     // Load Image
@@ -40,28 +50,23 @@ pub fn generate_board(file: &String) -> Result<(Board, GenerateResult), Box<dyn 
         particles: particles,
     };
 
-    // Try loading static field
-    match update_static_field(file, &mut board, img) {
-        Ok(generate_result) => {
-            return Ok((board, generate_result));
-        }
-        Err(err) => {
-            panic!();
-        }
-    }
+    // Try loading or generating the static field.
+    let field_result = update_static_field(file, &mut board, img, use_gpu)?;
+
+    Ok((board, field_result))
 }
 
-pub fn load_image(filename: &String) -> image::DynamicImage {
-    let path = Path::new(&filename);
-    let img = image::open(path).unwrap().grayscale();
-    img
+pub fn load_image(full_path: &str) -> image::DynamicImage {
+    let path = Path::new(&full_path);
+    image::open(path).unwrap().grayscale()
 }
 
 pub fn update_static_field(
-    frame_filename: &String,
+    frame_filename: &str,
     board: &mut Board,
     img: image::DynamicImage,
-) -> Result<GenerateResult, Box<dyn Error>> {
+    use_gpu: bool,
+) -> Result<FieldLoadOutcome, Box<dyn Error>> {
     let str_field_path = format!("{}.field", frame_filename);
     let field_path = Path::new(&str_field_path);
     if Path::exists(&field_path) {
@@ -71,31 +76,33 @@ pub fn update_static_field(
         );
 
         let load_result = board.load_static_field(field_path);
-        match load_result {
-            Ok(_) => {
-                if !board.is_field_corrupted() {
-                    return Ok(GenerateResult::FieldLoaded);
-                } else {
-                    board.clear_static_field();
-                }
+        if load_result.is_ok() {
+            if !board.is_field_corrupted() {
+                return Ok(FieldLoadOutcome::FieldLoaded);
+            } else {
+                board.clear_static_field();
             }
-            Err(_) => (),
         }
         println!("Corrupted field '{frame_filename}'")
     }
+
     println!(
         "[Debug] Generating static attraction field for '{}'.",
         frame_filename
     );
-    board.CUDA_generate_static_field(get_attractors(img));
 
-    Ok(GenerateResult::FieldGenerated)
+    if use_gpu {
+        board.cuda_generate_static_field(get_attractors(img));
+    } else {
+        board.generate_static_field(get_attractors(img));
+    }
+    Ok(FieldLoadOutcome::FieldGenerated)
 }
 
 fn get_attractors(img: image::DynamicImage) -> Vec<(u32, u32)> {
     let mut attractors = vec![];
     for (x, y, color) in img.pixels() {
-        if filter(color) {
+        if filter_white(color) {
             attractors.push((x, y));
         }
     }
@@ -103,6 +110,6 @@ fn get_attractors(img: image::DynamicImage) -> Vec<(u32, u32)> {
 }
 
 /// Returns true if the pixel is "close enough" to white. In this case, "close enough" means all color channels are above half active.
-fn filter(color: image::Rgba<u8>) -> bool {
+fn filter_white(color: image::Rgba<u8>) -> bool {
     color.0[0] > 255 / 2 && color.0[1] > 255 / 2 && color.0[2] > 255 / 2 && color.0[3] > 255 / 2
 }
